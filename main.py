@@ -37,17 +37,19 @@ def rename_file(file_path, category):
 
 def organize_file(file_path, category):
     category_folder = file_path.parent / category
-    category_folder.mkdir(exist_ok=True)
-    shutil.move(file_path, category_folder / file_path.name)
+    
 
 
 def process_directory(directory_path, progress_bar=None):
-    file_count = sum(1 for _ in os.scandir(directory_path) if _.is_file())
+    file_count = 0
+    for root, dirs, files in os.walk(directory_path):
+        file_count += len(files)
+
     processed_files = 0
 
-    for entry in os.scandir(directory_path):
-        if entry.is_file():
-            file_path = Path(entry.path)
+    for root, dirs, files in os.walk(directory_path):
+        for entry in files:
+            file_path = Path(root) / entry
             file_type = get_file_type(file_path)
             if file_type:
                 new_file_path = rename_file(file_path, file_type)
@@ -57,6 +59,7 @@ def process_directory(directory_path, progress_bar=None):
             if progress_bar:
                 progress_bar["value"] = (processed_files / file_count) * 100
                 progress_bar.update()
+
 
 
 def select_directory():
