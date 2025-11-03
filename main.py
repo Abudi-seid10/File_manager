@@ -156,11 +156,13 @@ def undo_last_action() -> bool:
     try:
         last_action = action_history.pop()
         if last_action["type"] == "rename":
+            # Revert: new name back to original name
             os.rename(last_action["to"], last_action["from"])
             logger.info(f"Undid rename: {last_action['to']} -> {last_action['from']}")
         elif last_action["type"] == "move":
-            shutil.move(last_action["from"], last_action["to"])
-            logger.info(f"Undid move: {last_action['from']} -> {last_action['to']}")
+            # Revert: new location back to original location
+            shutil.move(last_action["to"], last_action["from"])
+            logger.info(f"Undid move: {last_action['to']} -> {last_action['from']}")
         return True
     except Exception as e:
         logger.error(f"Error undoing action: {e}")
@@ -314,8 +316,8 @@ def organize_file(
                             parent_folder.rename(new_parent_folder)
                             action_history.append({
                                 "type": "rename",
-                                "from": str(new_parent_folder),
-                                "to": str(parent_folder)
+                                "from": str(parent_folder),
+                                "to": str(new_parent_folder)
                             })
                             logger.info(f"Renamed folder: {parent_folder} -> {new_parent_folder}")
 
@@ -338,8 +340,8 @@ def organize_file(
                 shutil.move(str(file_path), str(target_path))
                 action_history.append({
                     "type": "move",
-                    "from": str(target_path),
-                    "to": str(file_path)
+                    "from": str(file_path),
+                    "to": str(target_path)
                 })
                 logger.info(f"Moved: {file_path} -> {target_path}")
     except Exception as e:
