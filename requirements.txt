@@ -1,0 +1,12 @@
+# File Organizer Requirements
+# Python 3.8+
+
+# No external dependencies required for core functionality
+# tkinter is included with Python standard library on most systems
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.0.0

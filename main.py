@@ -151,7 +151,7 @@ def organize_file(file_path, category, dry_run=False, custom_actions=None):
     
 
 
-def process_directory(directory_path, progress_bar=None, recursive=True, logger=None):
+def process_directory(directory_path, progress_bar=None, recursive=True, logger=None, dry_run=False):
     file_count = 0
     for root, dirs, files in os.walk(directory_path):
         file_count += len(files)
@@ -163,17 +163,15 @@ def process_directory(directory_path, progress_bar=None, recursive=True, logger=
             file_path = Path(root) / entry
             file_type = get_file_type(file_path)
             if file_type:
-                new_file_path = rename_file(file_path, file_type)
-                organize_file(new_file_path, file_type)
+                new_file_path = rename_file(file_path, file_type, dry_run=dry_run)
+                organize_file(new_file_path, file_type, dry_run=dry_run)
+                if logger:
+                    logger(f"Processed: {file_path}")
 
             processed_files += 1
             if progress_bar:
                 progress_bar["value"] = (processed_files / file_count) * 100
                 progress_bar.update()
-    if logger:
-        logger(f"Processed: {file_path}")
-    new_file_path = rename_file(file_path, file_type, dry_run=dry_run)
-    organize_file(new_file_path, file_type, dry_run=dry_run)
 
 
 class FileOrganizerGUI:
@@ -251,12 +249,12 @@ class FileOrganizerGUI:
             self.progress_bar["value"] = 0
             self.progress_bar.update()
             try:
-                process_directory(Path(directory_path), self.progress_bar, self.recursive.get(), self.log)
+                process_directory(Path(directory_path), self.progress_bar, self.recursive.get(), self.log, self.dry_run_mode.get())
                 messagebox.showinfo("Done", "✅ All files have been processed successfully!")
             except Exception as e:
                 messagebox.showerror("Error", f"❌ An error occurred:\n\n{str(e)}")
-        if not self.dry_run_mode.get():
-            check_for_duplicates(directory_path, self.log)
+            if not self.dry_run_mode.get():
+                check_for_duplicates(directory_path, self.log)
 
     def undo(self):
         try:
